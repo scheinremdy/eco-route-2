@@ -1,65 +1,92 @@
-// Initialize the map
 let map;
 
+// Initialize Map
 function initMap() {
-  map = L.map('map').setView([10.3157, 123.8854], 13); // Example: Cebu City coordinates
+  map = L.map('map').setView([10.3157, 123.8854], 13); // Default view
 
-  // Add OpenStreetMap tiles
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '© OpenStreetMap contributors'
   }).addTo(map);
 }
 
-// Fetch and display eco-friendly routes
-async function fetchEcoRoutes() {
-  // Simulate eco-friendly route data
-  return [
-    { coordinates: [[10.3157, 123.8854], [10.3180, 123.8860], [10.3200, 123.8900]] },
-    { coordinates: [[10.3157, 123.8854], [10.3120, 123.8800], [10.3100, 123.8780]] }
-  ];
+// Geocode Locations
+async function geocode(address) {
+  const response = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(address)}&format=json`);
+  const data = await response.json();
+  return data[0] ? [parseFloat(data[0].lat), parseFloat(data[0].lon)] : null;
 }
 
-async function displayEcoRoutes() {
-  const routes = await fetchEcoRoutes();
+// Detect User Location
+function detectUserLocation() {
+  if (!navigator.geolocation) {
+    alert('Geolocation is not supported by your browser.');
+    return;
+  }
 
-  routes.forEach(route => {
-    L.polyline(route.coordinates, {
-      color: 'green',
-      weight: 4,
-      opacity: 0.7
-    }).addTo(map);
-  });
-
-  // Show modal
-  showModal();
+  navigator.geolocation.getCurrentPosition(
+    position => {
+      const { latitude, longitude } = position.coords;
+      map.setView([latitude, longitude], 14);
+      L.marker([latitude, longitude]).addTo(map).bindPopup('You are here!').openPopup();
+    },
+    () => alert('Unable to retrieve your location.')
+  );
 }
 
-// Show modal
-function showModal() {
-  const modal = document.getElementById('modal');
-  if (modal) modal.style.display = 'flex';
+// Find Route
+async function findRoute() {
+  const startAddress = document.getElementById('start-location').value;
+  const endAddress = document.getElementById('goal-destination').value;
+  const transportMode = document.getElementById('transport-mode').value;
+
+  const startCoords = await geocode(startAddress);
+  const endCoords = await geocode(endAddress);
+
+  if (!startCoords || !endCoords) {
+    alert('Could not locate one or both addresses.');
+    return;
+  }
+
+  L.marker(startCoords).addTo(map).bindPopup('Start').openPopup();
+  L.marker(endCoords).addTo(map).bindPopup('Destination').openPopup();
+
+  // Draw route (simulation)
+  L.polyline([startCoords, endCoords], {
+    color: transportMode === 'walking' ? 'green' : 'blue',
+    weight: 5
+  }).addTo(map);
 }
 
-// Close modal
-function closeModal() {
-  const modal = document.getElementById('modal');
-  if (modal) modal.style.display = 'none';
+// Language Toggle
+function toggleLanguage(lang) {
+  const elements = {
+    en: {
+      title: 'Eco-Friendly Route Finder',
+      placeholderStart: 'Enter your location',
+      placeholderEnd: 'Enter destination',
+      modalMessage: 'Eco-friendly routes successfully displayed on the map!'
+    },
+    de: {
+      title: 'Umweltfreundlicher Routenfinder',
+      placeholderStart: 'Geben Sie Ihren Standort ein',
+      placeholderEnd: 'Ziel eingeben',
+      modalMessage: 'Umweltfreundliche Routen wurden erfolgreich auf der Karte angezeigt!'
+    }
+  };
+
+  const langData = elements[lang];
+  document.getElementById('title').innerText = langData.title;
+  document.getElementById('start-location').placeholder = langData.placeholderStart;
+  document.getElementById('goal-destination').placeholder = langData.placeholderEnd;
+  document.getElementById('modal-message').innerText = langData.modalMessage;
 }
 
-// Add event listeners after DOM loads
+// Event Listeners
 document.addEventListener('DOMContentLoaded', () => {
-  // Initialize the map
   initMap();
 
-  // Find route button event listener
-  const findRouteButton = document.getElementById('find-route');
-  if (findRouteButton) {
-    findRouteButton.addEventListener('click', displayEcoRoutes);
-  }
-
-  // Close modal event listener
-  const closeModalButton = document.getElementById('close-modal');
-  if (closeModalButton) {
-    closeModalButton.addEventListener('click', closeModal);
-  }
+  document.getElementById('find-route').addEventListener('click', findRoute);
+  document.getElementById('detect-location').addEventListener('click', detectUserLocation);
+  document.getElementById('lang-en').addEventListener('click', () => toggleLanguage('en'));
+  document.getElementById('lang-de').addEventListener('click', () => toggleLanguage('de'));
 });
