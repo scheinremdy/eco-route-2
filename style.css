@@ -1,35 +1,136 @@
-/* Search Bar */
-#search {
-  margin: 10px;
-  display: flex;
-  gap: 10px;
-  justify-content: center;
+/* General Styling */
+body {
+  font-family: 'Arial', sans-serif;
+  margin: 0;
+  padding: 0;
+  background: #f4f4f9;
 }
 
-#search input, #search select, #search button {
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
+/* Header */
+.modern-header {
+  background-color: #2c3e50;
+  color: white;
+  padding: 15px;
+  text-align: center;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modern-header h1 {
+  margin: 0;
 }
 
 #language-toggle {
-  margin: 10px;
-  text-align: right;
+  display: flex;
+  gap: 10px;
 }
 
-#language-toggle button {
-  margin: 5px;
+.lang-btn {
   padding: 5px 10px;
   border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  background-color: #3498db;
+  color: white;
+  font-size: 14px;
+}
+
+.lang-btn:hover {
+  background-color: #2980b9;
+}
+
+/* Search Container */
+.search-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  padding: 10px;
+  background-color: white;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.input-group {
+  display: flex;
+  align-items: center;
+}
+
+.input-group input {
+  width: 250px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 3px 0 0 3px;
+}
+
+.icon-btn {
+  padding: 10px;
+  background-color: #3498db;
+  color: white;
+  border: none;
+  border-radius: 0 3px 3px 0;
   cursor: pointer;
 }
 
-#lang-en {
-  background-color: #4CAF50;
-  color: white;
+.icon-btn:hover {
+  background-color: #2980b9;
 }
 
-#lang-de {
-  background-color: #2196F3;
+.modern-select, .modern-btn {
+  padding: 10px;
+  border-radius: 3px;
+  border: 1px solid #ccc;
+  cursor: pointer;
+}
+
+.modern-btn {
+  background-color: #27ae60;
   color: white;
+  font-weight: bold;
+}
+
+.modern-btn:hover {
+  background-color: #219150;
+}
+
+/* Map Container */
+.map-container {
+  width: 100%;
+  height: 70vh;
+  margin: 20px 0;
+}
+
+/* Modal */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0, 0, 0, 0.4);
+}
+
+.modal-content {
+  background-color: white;
+  margin: 15% auto;
+  padding: 20px;
+  border: 1px solid #888;
+  width: 80%;
+  border-radius: 5px;
+}
+
+.close {
+  color: #aaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.close:hover, .close:focus {
+  color: black;
+  text-decoration: none;
+  cursor: pointer;
 }
