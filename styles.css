@@ -28,7 +28,7 @@ label {
   font-weight: bold;
 }
 
-input {
+input, select {
   padding: 5px;
   border: 1px solid #ccc;
   border-radius: 5px;
@@ -36,7 +36,7 @@ input {
 
 button {
   padding: 10px;
-  background-color: #27ae60;
+  background-color: #3498db;
   color: white;
   border: none;
   border-radius: 5px;
@@ -45,7 +45,7 @@ button {
 }
 
 button:hover {
-  background-color: #219150;
+  background-color: #2980b9;
 }
 
 #map {
