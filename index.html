@@ -7,38 +7,41 @@
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
 </head>
 <body>
-  <header>
-    <h1 id="title">Eco-Friendly Route Finder</h1>
+  <header class="modern-header">
+    <h1 id="title">🌍 Eco Route Finder</h1>
     <div id="language-toggle">
-      <button id="lang-en">English</button>
-      <button id="lang-de">Deutsch</button>
+      <button id="lang-en" class="lang-btn">English</button>
+      <button id="lang-de" class="lang-btn">Deutsch</button>
     </div>
   </header>
 
-  <!-- Search Inputs -->
-  <div id="search">
-    <input type="text" id="start-location" placeholder="Enter your location">
+  <!-- Search Bar -->
+  <div id="search" class="search-container">
+    <div class="input-group">
+      <input type="text" id="start-location" placeholder="Enter your location">
+      <button id="detect-location" class="icon-btn" title="Detect My Location"><i class="fas fa-location-arrow"></i></button>
+    </div>
     <input type="text" id="goal-destination" placeholder="Enter destination">
-    <select id="transport-mode">
+    <select id="transport-mode" class="modern-select">
       <option value="walking">By Foot</option>
       <option value="driving">By Car</option>
       <option value="cycling">By Bike</option>
       <option value="public_transport">Public Transport</option>
       <option value="airplane">By Airplane</option>
     </select>
-    <button id="find-route">Find Route</button>
-    <button id="detect-location">Use My Location</button>
+    <button id="find-route" class="modern-btn">Find Route</button>
   </div>
 
   <!-- Map -->
-  <div id="map"></div>
+  <div id="map" class="map-container"></div>
 
   <!-- Modal -->
-  <div id="modal">
+  <div id="modal" class="modal">
     <div class="modal-content">
-      <span id="close-modal">&times;</span>
+      <span id="close-modal" class="close">&times;</span>
       <p id="modal-message">Eco-friendly routes successfully displayed on the map!</p>
     </div>
   </div>
