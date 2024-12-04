@@ -1,92 +1,95 @@
-let map;
+document.addEventListener("DOMContentLoaded", () => {
+  const map = L.map("map").setView([0, 0], 2); // Initial world view
 
-// Initialize Map
-function initMap() {
-  map = L.map('map').setView([10.3157, 123.8854], 13); // Default view
-
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '© OpenStreetMap contributors'
+  // Add OpenStreetMap tile layer
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
   }).addTo(map);
-}
 
-// Geocode Locations
-async function geocode(address) {
-  const response = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(address)}&format=json`);
-  const data = await response.json();
-  return data[0] ? [parseFloat(data[0].lat), parseFloat(data[0].lon)] : null;
-}
+  let userMarker;
+  let destinationMarker;
+  let routeLayer;
 
-// Detect User Location
-function detectUserLocation() {
-  if (!navigator.geolocation) {
-    alert('Geolocation is not supported by your browser.');
-    return;
-  }
+  const startInput = document.getElementById("start-location");
+  const goalInput = document.getElementById("goal-destination");
+  const transportSelect = document.getElementById("transport-mode");
+  const detectLocationButton = document.getElementById("detect-location");
+  const findRouteButton = document.getElementById("find-route");
+  const modal = document.getElementById("modal");
+  const closeModal = document.getElementById("close-modal");
 
-  navigator.geolocation.getCurrentPosition(
-    position => {
-      const { latitude, longitude } = position.coords;
-      map.setView([latitude, longitude], 14);
-      L.marker([latitude, longitude]).addTo(map).bindPopup('You are here!').openPopup();
-    },
-    () => alert('Unable to retrieve your location.')
-  );
-}
-
-// Find Route
-async function findRoute() {
-  const startAddress = document.getElementById('start-location').value;
-  const endAddress = document.getElementById('goal-destination').value;
-  const transportMode = document.getElementById('transport-mode').value;
-
-  const startCoords = await geocode(startAddress);
-  const endCoords = await geocode(endAddress);
-
-  if (!startCoords || !endCoords) {
-    alert('Could not locate one or both addresses.');
-    return;
-  }
-
-  L.marker(startCoords).addTo(map).bindPopup('Start').openPopup();
-  L.marker(endCoords).addTo(map).bindPopup('Destination').openPopup();
-
-  // Draw route (simulation)
-  L.polyline([startCoords, endCoords], {
-    color: transportMode === 'walking' ? 'green' : 'blue',
-    weight: 5
-  }).addTo(map);
-}
-
-// Language Toggle
-function toggleLanguage(lang) {
-  const elements = {
-    en: {
-      title: 'Eco-Friendly Route Finder',
-      placeholderStart: 'Enter your location',
-      placeholderEnd: 'Enter destination',
-      modalMessage: 'Eco-friendly routes successfully displayed on the map!'
-    },
-    de: {
-      title: 'Umweltfreundlicher Routenfinder',
-      placeholderStart: 'Geben Sie Ihren Standort ein',
-      placeholderEnd: 'Ziel eingeben',
-      modalMessage: 'Umweltfreundliche Routen wurden erfolgreich auf der Karte angezeigt!'
+  // Function to detect user location
+  const detectUserLocation = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          startInput.value = `${latitude}, ${longitude}`;
+          if (userMarker) map.removeLayer(userMarker);
+          userMarker = L.marker([latitude, longitude]).addTo(map).bindPopup("Your Location").openPopup();
+          map.setView([latitude, longitude], 13);
+        },
+        (error) => {
+          alert("Failed to detect location. Please enter manually.");
+          console.error(error);
+        }
+      );
+    } else {
+      alert("Geolocation is not supported by your browser.");
     }
   };
 
-  const langData = elements[lang];
-  document.getElementById('title').innerText = langData.title;
-  document.getElementById('start-location').placeholder = langData.placeholderStart;
-  document.getElementById('goal-destination').placeholder = langData.placeholderEnd;
-  document.getElementById('modal-message').innerText = langData.modalMessage;
-}
+  // Function to fetch and display a route
+  const findRoute = async () => {
+    const startLocation = startInput.value;
+    const goalDestination = goalInput.value;
+    const transportMode = transportSelect.value;
 
-// Event Listeners
-document.addEventListener('DOMContentLoaded', () => {
-  initMap();
+    if (!startLocation || !goalDestination) {
+      alert("Please provide both start and goal locations.");
+      return;
+    }
 
-  document.getElementById('find-route').addEventListener('click', findRoute);
-  document.getElementById('detect-location').addEventListener('click', detectUserLocation);
-  document.getElementById('lang-en').addEventListener('click', () => toggleLanguage('en'));
-  document.getElementById('lang-de').addEventListener('click', () => toggleLanguage('de'));
+    // Remove existing route layer if present
+    if (routeLayer) map.removeLayer(routeLayer);
+
+    // Fetch route from OpenRouteService API (replace with your API key)
+    const apiKey = "your-api-key-here"; // Replace with your OpenRouteService API key
+    const [startLat, startLng] = startLocation.split(",").map(Number);
+    const [goalLat, goalLng] = goalDestination.split(",").map(Number);
+
+    const url = `https://api.openrouteservice.org/v2/directions/${transportMode}?api_key=${apiKey}&start=${startLng},${startLat}&end=${goalLng},${goalLat}`;
+    
+    try {
+      const response = await fetch(url);
+      if (!response.ok) throw new Error("Failed to fetch route.");
+      const data = await response.json();
+
+      const coordinates = data.features[0].geometry.coordinates.map(([lng, lat]) => [lat, lng]);
+
+      // Add route to map
+      routeLayer = L.polyline(coordinates, { color: "green", weight: 4 }).addTo(map);
+      map.fitBounds(routeLayer.getBounds());
+
+      // Add destination marker
+      if (destinationMarker) map.removeLayer(destinationMarker);
+      destinationMarker = L.marker([goalLat, goalLng]).addTo(map).bindPopup("Destination").openPopup();
+
+      // Show success modal
+      modal.style.display = "block";
+    } catch (error) {
+      alert("Failed to display route. Please check your input.");
+      console.error(error);
+    }
+  };
+
+  // Event Listeners
+  detectLocationButton.addEventListener("click", detectUserLocation);
+  findRouteButton.addEventListener("click", findRoute);
+  closeModal.addEventListener("click", () => (modal.style.display = "none"));
+
+  // Close modal when clicking outside of it
+  window.addEventListener("click", (event) => {
+    if (event.target === modal) modal.style.display = "none";
+  });
 });
