@@ -10,22 +10,36 @@
 </head>
 <body>
   <header>
-    <h1>Eco-Friendly Route Finder</h1>
+    <h1 id="title">Eco-Friendly Route Finder</h1>
+    <div id="language-toggle">
+      <button id="lang-en">English</button>
+      <button id="lang-de">Deutsch</button>
+    </div>
   </header>
 
-  <!-- Map Container -->
-  <div id="map"></div>
-
-  <!-- Action Buttons -->
-  <div id="controls">
-    <button id="find-route">Find Eco Routes</button>
+  <!-- Search Inputs -->
+  <div id="search">
+    <input type="text" id="start-location" placeholder="Enter your location">
+    <input type="text" id="goal-destination" placeholder="Enter destination">
+    <select id="transport-mode">
+      <option value="walking">By Foot</option>
+      <option value="driving">By Car</option>
+      <option value="cycling">By Bike</option>
+      <option value="public_transport">Public Transport</option>
+      <option value="airplane">By Airplane</option>
+    </select>
+    <button id="find-route">Find Route</button>
+    <button id="detect-location">Use My Location</button>
   </div>
+
+  <!-- Map -->
+  <div id="map"></div>
 
   <!-- Modal -->
   <div id="modal">
     <div class="modal-content">
       <span id="close-modal">&times;</span>
-      <p>Eco-friendly routes successfully displayed on the map!</p>
+      <p id="modal-message">Eco-friendly routes successfully displayed on the map!</p>
     </div>
   </div>
 
