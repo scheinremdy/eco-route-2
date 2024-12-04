@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Eco Route</title>
+  <title>Eco-Friendly Route Planner</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css">
   <link rel="stylesheet" href="styles.css">
   <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
@@ -11,20 +11,26 @@
 </head>
 <body>
   <div id="app">
-    <h1>Eco-Friendly Route Planner</h1>
+    <h1 data-lang="title">Eco-Friendly Route Planner</h1>
     <div id="controls">
-      <label for="start-location">Start Location:</label>
-      <input type="text" id="start-location" placeholder="Latitude, Longitude">
+      <label for="start-location" data-lang="start">Start Location:</label>
+      <input type="text" id="start-location" placeholder="City or Province">
 
-      <label for="goal-destination">Goal Destination:</label>
-      <input type="text" id="goal-destination" placeholder="Latitude, Longitude">
+      <label for="goal-destination" data-lang="goal">Goal Destination:</label>
+      <input type="text" id="goal-destination" placeholder="City or Province">
 
-      <button id="detect-location">Detect Location</button>
-      <button id="find-route">Find Route</button>
+      <label for="language" data-lang="language">Language:</label>
+      <select id="language">
+        <option value="en">English</option>
+        <option value="de">Deutsch</option>
+      </select>
+
+      <button id="detect-location" data-lang="detect">Detect Location</button>
+      <button id="find-route" data-lang="find">Find Route</button>
     </div>
     <div id="map"></div>
   </div>
 
-  <script src="script.js"></script>
+  <script src="script.js" defer></script>
 </body>
 </html>
