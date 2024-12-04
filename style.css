@@ -1,71 +1,35 @@
-/* General Styles */
-body {
-  margin: 0;
-  font-family: Arial, sans-serif;
-  text-align: center;
-}
-
-header {
-  background-color: #4CAF50;
-  color: white;
-  padding: 10px;
-}
-
-h1 {
-  margin: 0;
-}
-
-/* Map Container */
-#map {
-  width: 100%;
-  height: 500px;
-  border: 1px solid #ccc;
-}
-
-/* Buttons */
-#controls {
-  margin: 20px;
-}
-
-button {
-  background-color: #4CAF50;
-  color: white;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-button:hover {
-  background-color: #45a049;
-}
-
-/* Modal */
-#modal {
-  display: none;
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
+/* Search Bar */
+#search {
+  margin: 10px;
+  display: flex;
+  gap: 10px;
   justify-content: center;
-  align-items: center;
 }
 
-.modal-content {
-  background-color: white;
-  padding: 20px;
-  border-radius: 10px;
-  text-align: center;
-  position: relative;
+#search input, #search select, #search button {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
 }
 
-#close-modal {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  color: red;
-  font-size: 18px;
+#language-toggle {
+  margin: 10px;
+  text-align: right;
+}
+
+#language-toggle button {
+  margin: 5px;
+  padding: 5px 10px;
+  border: none;
   cursor: pointer;
+}
+
+#lang-en {
+  background-color: #4CAF50;
+  color: white;
+}
+
+#lang-de {
+  background-color: #2196F3;
+  color: white;
 }
