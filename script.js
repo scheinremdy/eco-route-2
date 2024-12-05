@@ -13,6 +13,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const languageSelect = document.getElementById("language");
   const detectLocationButton = document.getElementById("detect-location");
   const findRouteButton = document.getElementById("find-route");
+  const transportModeSelect = document.getElementById("transport-mode");
+  const publicTransportOptions = document.getElementById("public-transport-options");
+  const publicTransportTypeSelect = document.getElementById("public-transport-type");
 
   // Multilingual support
   const translations = {
@@ -23,6 +26,8 @@ document.addEventListener("DOMContentLoaded", () => {
       language: "Language:",
       detect: "Detect Location",
       find: "Find Route",
+      transportMode: "Select Transport Mode:",
+      publicTransportType: "Public Transport Type:",
     },
     de: {
       title: "Umweltfreundlicher Routenplaner",
@@ -31,6 +36,8 @@ document.addEventListener("DOMContentLoaded", () => {
       language: "Sprache:",
       detect: "Standort erkennen",
       find: "Route finden",
+      transportMode: "Transportmodus auswählen:",
+      publicTransportType: "Öffentlicher Verkehrstyp:",
     },
   };
 
@@ -39,9 +46,20 @@ document.addEventListener("DOMContentLoaded", () => {
     document.querySelector("[data-lang='start']").textContent = translations[lang].start;
     document.querySelector("[data-lang='goal']").textContent = translations[lang].goal;
     document.querySelector("[data-lang='language']").textContent = translations[lang].language;
+    document.querySelector("[data-lang='transport-mode']").textContent = translations[lang].transportMode;
+    document.querySelector("[data-lang='public-transport-type']").textContent = translations[lang].publicTransportType;
     detectLocationButton.textContent = translations[lang].detect;
     findRouteButton.textContent = translations[lang].find;
   };
+
+  // Show/hide public transport options based on the selected mode
+  transportModeSelect.addEventListener("change", (e) => {
+    if (e.target.value === "public-transport") {
+      publicTransportOptions.style.display = "block";
+    } else {
+      publicTransportOptions.style.display = "none";
+    }
+  });
 
   // Detect user location and set it as the start location
   const detectUserLocation = () => {
@@ -74,6 +92,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const findRoute = async () => {
     const startLocation = startInput.value.trim();
     const goalDestination = goalInput.value.trim();
+    const transportMode = transportModeSelect.value;
+    const publicTransportType = publicTransportTypeSelect.value;
 
     if (!startLocation || !goalDestination) {
       alert("Please provide both start and goal locations.");
@@ -89,14 +109,28 @@ document.addEventListener("DOMContentLoaded", () => {
       // Remove existing routing control if present
       if (routingControl) map.removeControl(routingControl);
 
-      // Add new routing control
-      routingControl = L.Routing.control({
+      // Define routing options
+      const options = {
         waypoints: [L.latLng(startCoords[0], startCoords[1]), L.latLng(goalCoords[0], goalCoords[1])],
         routeWhileDragging: true,
         lineOptions: {
           styles: [{ color: "blue", weight: 5 }],
         },
-      }).addTo(map);
+      };
+
+      // Adjust based on transport mode
+      if (transportMode === "cycling") {
+        options.router = L.Routing.osrmv1({ profile: "bike" }); // Cycling mode
+      } else if (transportMode === "walking") {
+        options.router = L.Routing.osrmv1({ profile: "foot" }); // Walking mode
+      } else if (transportMode === "public-transport") {
+        // Custom logic for public transport type
+        options.router = L.Routing.osrmv1({ profile: "car" }); // Placeholder for public transport
+        alert(`Selected public transport type: ${publicTransportType}`);
+      }
+
+      // Add new routing control
+      routingControl = L.Routing.control(options).addTo(map);
       map.setView(startCoords, 10);
     } catch (error) {
       alert(error.message);
