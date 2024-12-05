@@ -25,6 +25,25 @@
         <option value="de">Deutsch</option>
       </select>
 
+      <!-- New Transport Mode Section -->
+      <label for="transport-mode" data-lang="transport-mode">Select Transport Mode:</label>
+      <select id="transport-mode">
+        <option value="walking">Walking</option>
+        <option value="cycling">Cycling</option>
+        <option value="public-transport">Public Transport</option>
+      </select>
+
+      <!-- Public Transport Options (Hidden by Default) -->
+      <div id="public-transport-options" style="display: none;">
+        <label for="public-transport-type" data-lang="public-transport-type">Public Transport Type:</label>
+        <select id="public-transport-type">
+          <option value="bus">Bus</option>
+          <option value="train">Train</option>
+          <option value="subway">Subway</option>
+          <option value="tram">Tram</option>
+        </select>
+      </div>
+
       <button id="detect-location" data-lang="detect">Detect Location</button>
       <button id="find-route" data-lang="find">Find Route</button>
     </div>
