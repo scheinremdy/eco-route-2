@@ -1,41 +1,52 @@
-document.addEventListener("DOMContentLoaded", () => {
-    const findRouteBtn = document.getElementById("findRoute");
-    const startLocationInput = document.getElementById("startLocation");
-    const endLocationInput = document.getElementById("endLocation");
-    const transportModeSelect = document.getElementById("transportMode");
-    const mapElement = document.getElementById("map");
-    
-    let map = new google.maps.Map(mapElement, {
-        center: { lat: 48.8566, lng: 2.3522 }, // Default to Paris
-        zoom: 12,
+let map;
+let directionsService;
+let directionsRenderer;
+
+function initMap() {
+    map = new google.maps.Map(document.getElementById("map"), {
+        center: { lat: 48.8566, lng: 2.3522 }, // Default: Paris
+        zoom: 12
     });
 
-    let directionsService = new google.maps.DirectionsService();
-    let directionsRenderer = new google.maps.DirectionsRenderer();
+    directionsService = new google.maps.DirectionsService();
+    directionsRenderer = new google.maps.DirectionsRenderer();
     directionsRenderer.setMap(map);
 
-    findRouteBtn.addEventListener("click", () => {
-        const startLocation = startLocationInput.value;
-        const endLocation = endLocationInput.value;
-        const transportMode = transportModeSelect.value.toUpperCase();
+    // Enable autocomplete for start and end locations
+    new google.maps.places.Autocomplete(document.getElementById("start"));
+    new google.maps.places.Autocomplete(document.getElementById("end"));
+}
 
-        if (!startLocation || !endLocation) {
-            alert("Please enter both start and end locations.");
-            return;
+function calculateRoute() {
+    const start = document.getElementById("start").value;
+    const end = document.getElementById("end").value;
+    const travelMode = document.getElementById("travelMode").value;
+
+    if (!start || !end) {
+        alert("Please enter both start and destination locations!");
+        return;
+    }
+
+    const request = {
+        origin: start,
+        destination: end,
+        travelMode: google.maps.TravelMode[travelMode]
+    };
+
+    directionsService.route(request, (result, status) => {
+        if (status === google.maps.DirectionsStatus.OK) {
+            directionsRenderer.setDirections(result);
+
+            const route = result.routes[0].legs[0];
+            document.getElementById("routeDetails").innerHTML = `
+                <strong>Distance:</strong> ${route.distance.text} <br>
+                <strong>Duration:</strong> ${route.duration.text}
+            `;
+        } else {
+            alert("Could not find a route, try different locations!");
         }
-
-        const request = {
-            origin: startLocation,
-            destination: endLocation,
-            travelMode: google.maps.TravelMode[transportMode],
-        };
-
-        directionsService.route(request, (result, status) => {
-            if (status === google.maps.DirectionsStatus.OK) {
-                directionsRenderer.setDirections(result);
-            } else {
-                alert("Could not find route. Please try again.");
-            }
-        });
     });
-});
+}
+
+// Initialize the map when the window loads
+window.onload = initMap;
