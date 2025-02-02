@@ -3,37 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Eco Route Planner</title>
+    <title>Eco-Friendly Route Planner</title>
     <link rel="stylesheet" href="styles.css">
     <script defer src="script.js"></script>
-    <script defer src="https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_API_KEY&libraries=places"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 </head>
 <body>
-
-    <header>
-        <h1>🌿 Eco-Friendly Route Planner</h1>
-        <div id="weather">
-            <p id="weather-data">Loading weather...</p>
-        </div>
-    </header>
-
     <div class="container">
-        <div class="controls">
+        <h1>Eco-Friendly Route Planner</h1>
+        <div class="search-container">
             <input type="text" id="start" placeholder="Enter starting location">
-            <input type="text" id="destination" placeholder="Enter destination">
-            
-            <select id="transport-mode">
-                <option value="WALKING">🚶 Walking</option>
-                <option value="BICYCLING">🚲 Bicycling</option>
-                <option value="TRANSIT">🚌 Public Transport</option>
-                <option value="DRIVING">🚗 Driving</option>
-            </select>
-
-            <button onclick="calculateRoute()">Find Route</button>
+            <input type="text" id="end" placeholder="Enter destination">
+            <button id="findRoute">Find Route</button>
         </div>
-
         <div id="map"></div>
+        <p id="weatherInfo">Weather Info: Loading...</p>
+        <button id="toggleTheme">Toggle Dark Mode</button>
     </div>
-
 </body>
 </html>
