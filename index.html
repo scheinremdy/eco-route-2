@@ -7,12 +7,9 @@
     <link rel="stylesheet" href="styles.css">
     <script defer src="script.js"></script>
 
-    <!-- Leaflet.js for maps -->
+    <!-- Leaflet.js for Maps -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-    <!-- OpenStreetMap Autocomplete -->
-    <script src="https://nominatim.org/release/Nominatim.js"></script>
 </head>
 <body>
     <div class="container">
@@ -21,6 +18,7 @@
         <div class="input-container">
             <input type="text" id="start-location" placeholder="From (Enter a place)">
             <input type="text" id="end-location" placeholder="To (Enter a place)">
+            <button id="useLocation">📍 Use My Location</button>
             <button id="findRoute">Find Route</button>
         </div>
 
