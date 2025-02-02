@@ -6,22 +6,30 @@
     <title>Eco-Friendly Route Planner</title>
     <link rel="stylesheet" href="styles.css">
     <script defer src="script.js"></script>
-    <!-- Leaflet CSS -->
+    
+    <!-- Leaflet.js for maps -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <!-- Leaflet JavaScript -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <!-- Leaflet Routing Machine -->
-    <script src="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.js"></script>
 </head>
 <body>
     <div class="container">
         <h1>Eco-Friendly Route Planner</h1>
-        <div class="search-container">
+        
+        <div class="controls">
             <input type="text" id="start" placeholder="Enter starting location">
             <input type="text" id="end" placeholder="Enter destination">
             <button id="findRoute">Find Route</button>
         </div>
-        <div id="map"></div>
+
+        <div class="map-container">
+            <div id="map"></div>
+        </div>
+
+        <div id="route-info">
+            <p><strong>Suggested Mode:</strong> <span id="mode"></span></p>
+            <p><strong>Estimated Time:</strong> <span id="time"></span></p>
+        </div>
+
         <button id="toggleTheme">Toggle Dark Mode</button>
     </div>
 </body>
