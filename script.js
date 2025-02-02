@@ -1,50 +1,56 @@
-// API Keys
-const googleMapsApiKey = "YOUR_GOOGLE_MAPS_API_KEY"; // Replace with your Google Maps API Key
-
 let map;
-let directionsService;
-let directionsRenderer;
+let routeControl;
 
-// Initialize Google Map
+// Initialize Leaflet Map
 function initMap() {
-    map = new google.maps.Map(document.getElementById("map"), {
-        center: { lat: 52.5200, lng: 13.4050 }, // Default: Berlin
-        zoom: 12
-    });
+    // Create a map centered on Berlin
+    map = L.map('map').setView([52.5200, 13.4050], 12);
 
-    directionsService = new google.maps.DirectionsService();
-    directionsRenderer = new google.maps.DirectionsRenderer();
-    directionsRenderer.setMap(map);
+    // Set up OpenStreetMap tile layer
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
 
-    // Auto-complete input fields
-    const startInput = new google.maps.places.Autocomplete(document.getElementById("start"));
-    const destinationInput = new google.maps.places.Autocomplete(document.getElementById("end"));
+    // Initialize the route control
+    routeControl = L.Routing.control({
+        waypoints: [],
+        routeWhileDragging: true
+    }).addTo(map);
 }
 
-// Calculate Route
+// Find route using Leaflet Routing Machine
 function calculateRoute() {
     let start = document.getElementById("start").value;
-    let destination = document.getElementById("end").value;
-    let transportMode = "DRIVING";  // Default to driving for now (can add more modes like walking, cycling)
+    let end = document.getElementById("end").value;
 
-    if (!start || !destination) {
+    if (!start || !end) {
         alert("Please enter both start and destination.");
         return;
     }
 
-    let request = {
-        origin: start,
-        destination: destination,
-        travelMode: transportMode
-    };
+    // Use Nominatim API (OpenStreetMap's geocoding service) to get coordinates for the locations
+    fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${start}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.length === 0) {
+                alert("Starting location not found.");
+                return;
+            }
+            const startCoords = [data[0].lat, data[0].lon];
 
-    directionsService.route(request, (result, status) => {
-        if (status === google.maps.DirectionsStatus.OK) {
-            directionsRenderer.setDirections(result);
-        } else {
-            alert("Could not find a route. Please try different locations.");
-        }
-    });
+            fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${end}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.length === 0) {
+                        alert("Destination not found.");
+                        return;
+                    }
+                    const endCoords = [data[0].lat, data[0].lon];
+
+                    // Set the route on the map
+                    routeControl.setWaypoints([L.latLng(startCoords), L.latLng(endCoords)]);
+                });
+        });
 }
 
 // Load functions on window load
@@ -52,4 +58,3 @@ window.onload = () => {
     initMap();
     document.getElementById("findRoute").addEventListener("click", calculateRoute);
 };
-
