@@ -20,14 +20,17 @@ body {
     margin-bottom: 10px;
 }
 
-input {
-    padding: 8px;
-    width: 200px;
-}
-
 button {
     padding: 8px 15px;
     cursor: pointer;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+}
+
+button:hover {
+    background-color: #0056b3;
 }
 
 .map-container {
@@ -37,6 +40,11 @@ button {
 #map {
     height: 500px;
     width: 100%;
+    border-radius: 10px;
+}
+
+#route-info {
+    margin-top: 10px;
 }
 
 .dark-mode {
@@ -46,5 +54,4 @@ button {
 
 .dark-mode button {
     background-color: #444;
-    color: white;
 }
