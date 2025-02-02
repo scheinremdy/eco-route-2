@@ -1,82 +1,55 @@
-const weatherApiKey = 95e6e13f56fa93bf3300e4a6844dc074; 
+// API Keys
+const googleMapsApiKey = "YOUR_GOOGLE_MAPS_API_KEY"; // Replace with your Google Maps API Key
 
-// Initialize Leaflet Map
-let map = L.map('map').setView([52.52, 13.405], 12); // Default: Berlin
+let map;
+let directionsService;
+let directionsRenderer;
 
-// Load map tiles
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '&copy; OpenStreetMap contributors'
-}).addTo(map);
+// Initialize Google Map
+function initMap() {
+    map = new google.maps.Map(document.getElementById("map"), {
+        center: { lat: 52.5200, lng: 13.4050 }, // Default: Berlin
+        zoom: 12
+    });
 
-let routeLayer = L.layerGroup().addTo(map);
+    directionsService = new google.maps.DirectionsService();
+    directionsRenderer = new google.maps.DirectionsRenderer();
+    directionsRenderer.setMap(map);
 
-// Function to get route
-function getRoute() {
+    // Auto-complete input fields
+    const startInput = new google.maps.places.Autocomplete(document.getElementById("start"));
+    const destinationInput = new google.maps.places.Autocomplete(document.getElementById("end"));
+}
+
+// Calculate Route
+function calculateRoute() {
     let start = document.getElementById("start").value;
-    let end = document.getElementById("end").value;
+    let destination = document.getElementById("end").value;
+    let transportMode = "DRIVING";  // Default to driving for now (can add more modes like walking, cycling)
 
-    if (!start || !end) {
+    if (!start || !destination) {
         alert("Please enter both start and destination.");
         return;
     }
 
-    fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${start}`)
-        .then(res => res.json())
-        .then(startData => {
-            if (startData.length === 0) throw new Error("Start location not found");
-            return fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${end}`)
-                .then(res => res.json())
-                .then(endData => {
-                    if (endData.length === 0) throw new Error("Destination not found");
+    let request = {
+        origin: start,
+        destination: destination,
+        travelMode: transportMode
+    };
 
-                    let startCoords = [startData[0].lat, startData[0].lon];
-                    let endCoords = [endData[0].lat, endData[0].lon];
-
-                    routeLayer.clearLayers(); // Clear previous routes
-
-                    L.Routing.control({
-                        waypoints: [L.latLng(startCoords), L.latLng(endCoords)],
-                        routeWhileDragging: true
-                    }).addTo(routeLayer);
-
-                    map.setView(startCoords, 12);
-                });
-        })
-        .catch(error => alert(error.message));
+    directionsService.route(request, (result, status) => {
+        if (status === google.maps.DirectionsStatus.OK) {
+            directionsRenderer.setDirections(result);
+        } else {
+            alert("Could not find a route. Please try different locations.");
+        }
+    });
 }
 
-// Fetch Weather Data
-function getWeather() {
-    let city = "Berlin"; // Default city
-
-    fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${weatherApiKey}&units=metric`)
-        .then(response => {
-            if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-            return response.json();
-        })
-        .then(data => {
-            if (data.main && data.weather) {
-                let weatherInfo = `🌡 ${data.main.temp}°C | ${data.weather[0].description}`;
-                document.getElementById("weatherInfo").innerText = weatherInfo;
-            } else {
-                throw new Error("Invalid weather data");
-            }
-        })
-        .catch(error => {
-            console.error("Weather data error:", error);
-            document.getElementById("weatherInfo").innerText = "Failed to load weather data.";
-        });
-}
-
-// Toggle Dark Mode
-document.getElementById("toggleTheme").addEventListener("click", () => {
-    document.body.classList.toggle("dark-mode");
-});
-
-// Add event listener for route search
-document.getElementById("findRoute").addEventListener("click", getRoute);
-
-// Load weather data when the page loads
+// Load functions on window load
 window.onload = () => {
-    getWeather();
+    initMap();
+    document.getElementById("findRoute").addEventListener("click", calculateRoute);
 };
+
