@@ -1,12 +1,28 @@
 document.addEventListener("DOMContentLoaded", () => {
     let map = L.map('map').setView([52.52, 13.405], 12); // Default to Berlin
+    let routeLayer = null;
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; OpenStreetMap contributors'
     }).addTo(map);
 
-    let routeLayer = null;
-    
+    document.getElementById("useLocation").addEventListener("click", () => {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(position => {
+                let userCoords = {
+                    lat: position.coords.latitude,
+                    lng: position.coords.longitude
+                };
+                map.setView([userCoords.lat, userCoords.lng], 14);
+                document.getElementById("start-location").value = `${userCoords.lat}, ${userCoords.lng}`;
+            }, () => {
+                alert("Could not access location.");
+            });
+        } else {
+            alert("Geolocation is not supported by this browser.");
+        }
+    });
+
     document.getElementById("findRoute").addEventListener("click", () => {
         let startLocation = document.getElementById("start-location").value;
         let endLocation = document.getElementById("end-location").value;
