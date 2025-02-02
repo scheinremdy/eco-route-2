@@ -6,20 +6,21 @@
     <title>Eco-Friendly Route Planner</title>
     <link rel="stylesheet" href="styles.css">
     <script defer src="script.js"></script>
-    
-    <!-- Leaflet.js for maps -->
+
+    <!-- Leaflet.js for interactive maps -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 </head>
 <body>
     <div class="container">
         <h1>Eco-Friendly Route Planner</h1>
-        
+
         <div class="controls">
-            <input type="text" id="start" placeholder="Enter starting location">
-            <input type="text" id="end" placeholder="Enter destination">
-            <button id="findRoute">Find Route</button>
+            <button id="reset">Reset Map</button>
+            <button id="toggleTheme">Toggle Dark Mode</button>
         </div>
+
+        <p>Click on the map to set start and destination points.</p>
 
         <div class="map-container">
             <div id="map"></div>
@@ -27,10 +28,9 @@
 
         <div id="route-info">
             <p><strong>Suggested Mode:</strong> <span id="mode"></span></p>
+            <p><strong>Distance:</strong> <span id="distance"></span></p>
             <p><strong>Estimated Time:</strong> <span id="time"></span></p>
         </div>
-
-        <button id="toggleTheme">Toggle Dark Mode</button>
     </div>
 </body>
 </html>
