@@ -1,52 +1,31 @@
-let map;
-let directionsService;
-let directionsRenderer;
+const API_KEY = "YOUR_OPENWEATHER_API_KEY"; // Replace with your OpenWeather API key
+const map = L.map('map').setView([51.505, -0.09], 13); 
 
-function initMap() {
-    map = new google.maps.Map(document.getElementById("map"), {
-        center: { lat: 48.8566, lng: 2.3522 }, // Default: Paris
-        zoom: 12
-    });
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap contributors'
+}).addTo(map);
 
-    directionsService = new google.maps.DirectionsService();
-    directionsRenderer = new google.maps.DirectionsRenderer();
-    directionsRenderer.setMap(map);
+document.getElementById("findRoute").addEventListener("click", function() {
+    const startLocation = document.getElementById("start").value;
+    const endLocation = document.getElementById("end").value;
 
-    // Enable autocomplete for start and end locations
-    new google.maps.places.Autocomplete(document.getElementById("start"));
-    new google.maps.places.Autocomplete(document.getElementById("end"));
-}
-
-function calculateRoute() {
-    const start = document.getElementById("start").value;
-    const end = document.getElementById("end").value;
-    const travelMode = document.getElementById("travelMode").value;
-
-    if (!start || !end) {
-        alert("Please enter both start and destination locations!");
-        return;
+    if (startLocation && endLocation) {
+        alert(`Finding the best eco-friendly route from ${startLocation} to ${endLocation}...`);
+        fetchWeather();
+    } else {
+        alert("Please enter both locations.");
     }
+});
 
-    const request = {
-        origin: start,
-        destination: end,
-        travelMode: google.maps.TravelMode[travelMode]
-    };
-
-    directionsService.route(request, (result, status) => {
-        if (status === google.maps.DirectionsStatus.OK) {
-            directionsRenderer.setDirections(result);
-
-            const route = result.routes[0].legs[0];
-            document.getElementById("routeDetails").innerHTML = `
-                <strong>Distance:</strong> ${route.distance.text} <br>
-                <strong>Duration:</strong> ${route.duration.text}
-            `;
-        } else {
-            alert("Could not find a route, try different locations!");
-        }
-    });
+function fetchWeather() {
+    fetch(`https://api.openweathermap.org/data/2.5/weather?q=Berlin&appid=${API_KEY}&units=metric`)
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById("weatherInfo").textContent = `Weather: ${data.weather[0].description}, Temp: ${data.main.temp}°C`;
+        })
+        .catch(error => console.error("Weather data error:", error));
 }
 
-// Initialize the map when the window loads
-window.onload = initMap;
+document.getElementById("toggleTheme").addEventListener("click", () => {
+    document.body.classList.toggle("dark-mode");
+});
