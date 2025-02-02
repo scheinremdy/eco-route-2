@@ -3,23 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Eco-Friendly Route Planner</title>
+    <title>Eco Route Planner</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="icon" type="image/png" href="favicon.ico">
+
+    <!-- Leaflet.js for maps -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css">
+    <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
+
+    <!-- OpenWeather API -->
     <script defer src="script.js"></script>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 </head>
 <body>
-    <div class="container">
+
+    <header>
         <h1>Eco-Friendly Route Planner</h1>
-        <div class="search-container">
-            <input type="text" id="start" placeholder="Enter starting location">
-            <input type="text" id="end" placeholder="Enter destination">
-            <button id="findRoute">Find Route</button>
-        </div>
-        <div id="map"></div>
-        <p id="weatherInfo">Weather Info: Loading...</p>
-        <button id="toggleTheme">Toggle Dark Mode</button>
+        <p>Find the most sustainable way to travel!</p>
+    </header>
+
+    <div id="controls">
+        <input type="text" id="start-location" placeholder="Enter start location">
+        <input type="text" id="end-location" placeholder="Enter destination">
+        <button onclick="calculateRoute()">Find Route</button>
     </div>
+
+    <div id="map"></div>
+
+    <div id="weather-info">
+        <h2>Weather Conditions</h2>
+        <p id="weather-data">Loading...</p>
+    </div>
+
 </body>
 </html>
