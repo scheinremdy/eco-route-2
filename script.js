@@ -5,65 +5,71 @@ document.addEventListener("DOMContentLoaded", () => {
         attribution: '&copy; OpenStreetMap contributors'
     }).addTo(map);
 
-    let startMarker = null;
-    let endMarker = null;
     let routeLayer = null;
+    
+    document.getElementById("findRoute").addEventListener("click", () => {
+        let startLocation = document.getElementById("start-location").value;
+        let endLocation = document.getElementById("end-location").value;
 
-    // Click to set start & end points
-    map.on("click", function (e) {
-        if (!startMarker) {
-            startMarker = L.marker(e.latlng, { draggable: true }).addTo(map)
-                .bindPopup("Start Point").openPopup();
-        } else if (!endMarker) {
-            endMarker = L.marker(e.latlng, { draggable: true }).addTo(map)
-                .bindPopup("Destination").openPopup();
-            calculateRoute();
+        if (!startLocation || !endLocation) {
+            alert("Please enter both start and destination locations!");
+            return;
         }
+
+        getCoordinates(startLocation, (startCoords) => {
+            getCoordinates(endLocation, (endCoords) => {
+                drawRoute(startCoords, endCoords);
+            });
+        });
     });
 
-    function calculateRoute() {
-        if (!startMarker || !endMarker) return;
+    function getCoordinates(place, callback) {
+        let url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(place)}`;
+        
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                if (data.length > 0) {
+                    callback({ lat: data[0].lat, lng: data[0].lon });
+                } else {
+                    alert(`Could not find location: ${place}`);
+                }
+            })
+            .catch(error => console.error("Geolocation Error:", error));
+    }
 
-        let startCoords = startMarker.getLatLng();
-        let endCoords = endMarker.getLatLng();
+    function drawRoute(startCoords, endCoords) {
         let url = `https://routing.openstreetmap.de/routed-foot/route/v1/driving/${startCoords.lng},${startCoords.lat};${endCoords.lng},${endCoords.lat}?overview=full&geometries=geojson`;
 
         fetch(url)
             .then(response => response.json())
             .then(data => {
-                if (routeLayer) {
-                    map.removeLayer(routeLayer);
-                }
+                if (routeLayer) map.removeLayer(routeLayer);
 
                 let routeCoords = data.routes[0].geometry.coordinates.map(coord => [coord[1], coord[0]]);
                 routeLayer = L.polyline(routeCoords, { color: "green", weight: 5 }).addTo(map);
                 
-                let distance = (data.routes[0].distance / 1000).toFixed(2); // Convert meters to km
-                let estimatedTime = Math.ceil(data.routes[0].duration / 60); // Convert seconds to minutes
+                let distance = (data.routes[0].distance / 1000).toFixed(2);
+                let estimatedTime = Math.ceil(data.routes[0].duration / 60);
                 let ecoModes = ["Walking", "Cycling", "Public Transport"];
                 let chosenMode = ecoModes[Math.floor(Math.random() * ecoModes.length)];
 
                 document.getElementById("mode").innerText = chosenMode;
                 document.getElementById("distance").innerText = `${distance} km`;
                 document.getElementById("time").innerText = `${estimatedTime} mins`;
+
+                map.fitBounds(routeLayer.getBounds());
             })
             .catch(error => console.error("Error fetching route:", error));
     }
 
-    // Reset Map
     document.getElementById("reset").addEventListener("click", () => {
-        if (startMarker) map.removeLayer(startMarker);
-        if (endMarker) map.removeLayer(endMarker);
         if (routeLayer) map.removeLayer(routeLayer);
-        startMarker = null;
-        endMarker = null;
-        routeLayer = null;
         document.getElementById("mode").innerText = "";
         document.getElementById("distance").innerText = "";
         document.getElementById("time").innerText = "";
     });
 
-    // Dark Mode Toggle
     document.getElementById("toggleTheme").addEventListener("click", () => {
         document.body.classList.toggle("dark-mode");
     });
