@@ -3,26 +3,155 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Eco-Friendly Route Finder</title>
-    <link rel="stylesheet" href="styles.css">
-    <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&libraries=places"></script>
+    <title>Eco-Friendly Route Planner</title>
+
+    <!-- Leaflet CSS (for the Map) -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    
+    <!-- Leaflet Routing Machine CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.css" />
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            text-align: center;
+        }
+        #map {
+            width: 100%;
+            height: 500px;
+            margin-top: 10px;
+        }
+        .controls {
+            margin: 10px;
+        }
+        input, select, button {
+            padding: 10px;
+            margin: 5px;
+            font-size: 16px;
+        }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Eco-Friendly Route Finder</h1>
-        <div class="controls">
-            <input id="start" type="text" placeholder="Start Location">
-            <input id="end" type="text" placeholder="Destination">
-            <select id="travelMode">
-                <option value="WALKING">🚶 Walking</option>
-                <option value="BICYCLING">🚴 Cycling</option>
-                <option value="DRIVING">🚗 Driving</option>
-            </select>
-            <button onclick="calculateRoute()">Find Route</button>
-        </div>
-        <div id="map"></div>
-        <div id="routeDetails"></div>
+
+    <h2>Eco-Friendly Route Planner</h2>
+
+    <div class="controls">
+        <input type="text" id="start-location" placeholder="Enter start location">
+        <input type="text" id="end-location" placeholder="Enter destination">
+        <select id="transport-mode">
+            <option value="foot">Walking</option>
+            <option value="cycling">Cycling</option>
+            <option value="car">Driving (for EVs & shared rides)</option>
+        </select>
+        <button onclick="calculateRoute()">Find Route</button>
+        <button onclick="locateUser()">📍 Use My Location</button>
     </div>
-    <script src="script.js"></script>
+
+    <div id="map"></div>
+
+    <!-- Leaflet JS (for the Map) -->
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    
+    <!-- Leaflet Routing Machine JS -->
+    <script src="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.js"></script>
+    
+    <!-- Geocoding for Searching Locations -->
+    <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
+
+    <script>
+        // Initialize the map
+        var map = L.map('map').setView([51.505, -0.09], 13); // Default to London
+
+        // Add OpenStreetMap tiles
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        // Add Geocoder Search (for start & destination inputs)
+        var geocoder = L.Control.geocoder({
+            defaultMarkGeocode: false
+        }).on('markgeocode', function(e) {
+            var latlng = e.geocode.center;
+            map.setView(latlng, 15);
+        }).addTo(map);
+
+        // Routing control variable
+        var routingControl;
+
+        // Function to calculate the eco-friendly route
+        function calculateRoute() {
+            var startLocation = document.getElementById("start-location").value;
+            var endLocation = document.getElementById("end-location").value;
+            var transportMode = document.getElementById("transport-mode").value; // Get selected mode
+
+            if (!startLocation || !endLocation) {
+                alert("Please enter both start and destination locations.");
+                return;
+            }
+
+            // Use Geocoder to get coordinates
+            geocoder.options.geocoder.geocode(startLocation, function(results) {
+                if (results.length === 0) {
+                    alert("Start location not found.");
+                    return;
+                }
+                var startCoords = results[0].center;
+
+                geocoder.options.geocoder.geocode(endLocation, function(results) {
+                    if (results.length === 0) {
+                        alert("Destination not found.");
+                        return;
+                    }
+                    var endCoords = results[0].center;
+
+                    // Remove previous route if it exists
+                    if (routingControl) {
+                        map.removeControl(routingControl);
+                    }
+
+                    // Add new route
+                    routingControl = L.Routing.control({
+                        waypoints: [
+                            L.latLng(startCoords.lat, startCoords.lng),
+                            L.latLng(endCoords.lat, endCoords.lng)
+                        ],
+                        routeWhileDragging: true,
+                        router: L.Routing.osrmv1({
+                            profile: transportMode // Choose transport mode (foot, cycling, car)
+                        })
+                    }).addTo(map);
+
+                    // Zoom to the route
+                    map.fitBounds([startCoords, endCoords]);
+                });
+            });
+        }
+
+        // Function to detect and use user's current location
+        function locateUser() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    var lat = position.coords.latitude;
+                    var lng = position.coords.longitude;
+
+                    map.setView([lat, lng], 14);
+
+                    // Add marker for user's location
+                    L.marker([lat, lng]).addTo(map)
+                        .bindPopup("You are here")
+                        .openPopup();
+
+                    document.getElementById("start-location").value = lat + ", " + lng;
+                }, function() {
+                    alert("Could not get your location.");
+                });
+            } else {
+                alert("Geolocation is not supported by your browser.");
+            }
+        }
+    </script>
+
 </body>
 </html>
