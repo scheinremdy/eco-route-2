@@ -7,20 +7,27 @@
     <link rel="stylesheet" href="styles.css">
     <script defer src="script.js"></script>
 
-    <!-- Leaflet.js for interactive maps -->
+    <!-- Leaflet.js for maps -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <!-- OpenStreetMap Autocomplete -->
+    <script src="https://nominatim.org/release/Nominatim.js"></script>
 </head>
 <body>
     <div class="container">
         <h1>Eco-Friendly Route Planner</h1>
 
+        <div class="input-container">
+            <input type="text" id="start-location" placeholder="From (Enter a place)">
+            <input type="text" id="end-location" placeholder="To (Enter a place)">
+            <button id="findRoute">Find Route</button>
+        </div>
+
         <div class="controls">
             <button id="reset">Reset Map</button>
             <button id="toggleTheme">Toggle Dark Mode</button>
         </div>
-
-        <p>Click on the map to set start and destination points.</p>
 
         <div class="map-container">
             <div id="map"></div>
