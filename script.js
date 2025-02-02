@@ -1,67 +1,71 @@
-// Leaflet.js map initialization
-let map = L.map('map').setView([51.505, -0.09], 13); // Default location (London)
+// API Keys
+const weatherApiKey = "YOUR_OPENWEATHER_API_KEY";  // Replace with your OpenWeather API Key
+const googleMapsApiKey = "YOUR_GOOGLE_MAPS_API_KEY"; // Replace with your Google Maps API Key
 
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '&copy; OpenStreetMap contributors'
-}).addTo(map);
+let map;
+let directionsService;
+let directionsRenderer;
 
-// Routing control
-let routeControl;
+// Initialize Google Map
+function initMap() {
+    map = new google.maps.Map(document.getElementById("map"), {
+        center: { lat: 52.5200, lng: 13.4050 }, // Default: Berlin
+        zoom: 12
+    });
 
+    directionsService = new google.maps.DirectionsService();
+    directionsRenderer = new google.maps.DirectionsRenderer();
+    directionsRenderer.setMap(map);
+
+    // Auto-complete input fields
+    const startInput = new google.maps.places.Autocomplete(document.getElementById("start"));
+    const destinationInput = new google.maps.places.Autocomplete(document.getElementById("destination"));
+}
+
+// Calculate Route
 function calculateRoute() {
-    let start = document.getElementById("start-location").value;
-    let end = document.getElementById("end-location").value;
+    let start = document.getElementById("start").value;
+    let destination = document.getElementById("destination").value;
+    let transportMode = document.getElementById("transport-mode").value;
 
-    if (!start || !end) {
+    if (!start || !destination) {
         alert("Please enter both start and destination.");
         return;
     }
 
-    // Convert locations to coordinates using Nominatim API
-    getCoordinates(start, function (startCoords) {
-        getCoordinates(end, function (endCoords) {
-            if (routeControl) {
-                map.removeControl(routeControl);
-            }
+    let request = {
+        origin: start,
+        destination: destination,
+        travelMode: transportMode
+    };
 
-            routeControl = L.Routing.control({
-                waypoints: [
-                    L.latLng(startCoords.lat, startCoords.lon),
-                    L.latLng(endCoords.lat, endCoords.lon)
-                ],
-                routeWhileDragging: true
-            }).addTo(map);
-        });
+    directionsService.route(request, (result, status) => {
+        if (status === google.maps.DirectionsStatus.OK) {
+            directionsRenderer.setDirections(result);
+        } else {
+            alert("Could not find a route. Please try different locations.");
+        }
     });
 }
 
-// Function to get coordinates from address
-function getCoordinates(location, callback) {
-    fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${location}`)
-        .then(response => response.json())
-        .then(data => {
-            if (data.length > 0) {
-                callback({ lat: data[0].lat, lon: data[0].lon });
-            } else {
-                alert("Location not found.");
-            }
-        })
-        .catch(error => console.log("Error:", error));
-}
-
-// Fetch weather data
+// Fetch Weather Data
 function getWeather() {
-    let apiKey = "d2b6bd9d10b94f1f6e1a10110407fed7"; // OpenWeather API Key
-    let city = "Berlin"; // Default city (changeable)
-    
-    fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric`)
-        .then(response => response.json())
+    let city = "Berlin"; // Default city
+
+    fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${weatherApiKey}&units=metric`)
+        .then(response => {
+            if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+            return response.json();
+        })
         .then(data => {
-            let weatherInfo = `🌡 Temp: ${data.main.temp}°C | 🌦 Condition: ${data.weather[0].description}`;
+            let weatherInfo = `🌡 ${data.main.temp}°C | ${data.weather[0].description}`;
             document.getElementById("weather-data").innerText = weatherInfo;
         })
-        .catch(error => console.log("Error:", error));
+        .catch(error => console.error("Weather data error:", error));
 }
 
-// Load weather on startup
-window.onload = getWeather;
+// Load functions on window load
+window.onload = () => {
+    getWeather();
+    initMap();
+};
