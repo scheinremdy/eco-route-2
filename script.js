@@ -1,31 +1,67 @@
-const API_KEY = "YOUR_OPENWEATHER_API_KEY"; // Replace with your OpenWeather API key
-const map = L.map('map').setView([51.505, -0.09], 13); 
+// Leaflet.js map initialization
+let map = L.map('map').setView([51.505, -0.09], 13); // Default location (London)
 
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; OpenStreetMap contributors'
 }).addTo(map);
 
-document.getElementById("findRoute").addEventListener("click", function() {
-    const startLocation = document.getElementById("start").value;
-    const endLocation = document.getElementById("end").value;
+// Routing control
+let routeControl;
 
-    if (startLocation && endLocation) {
-        alert(`Finding the best eco-friendly route from ${startLocation} to ${endLocation}...`);
-        fetchWeather();
-    } else {
-        alert("Please enter both locations.");
+function calculateRoute() {
+    let start = document.getElementById("start-location").value;
+    let end = document.getElementById("end-location").value;
+
+    if (!start || !end) {
+        alert("Please enter both start and destination.");
+        return;
     }
-});
 
-function fetchWeather() {
-    fetch(`https://api.openweathermap.org/data/2.5/weather?q=Berlin&appid=${API_KEY}&units=metric`)
-        .then(response => response.json())
-        .then(data => {
-            document.getElementById("weatherInfo").textContent = `Weather: ${data.weather[0].description}, Temp: ${data.main.temp}°C`;
-        })
-        .catch(error => console.error("Weather data error:", error));
+    // Convert locations to coordinates using Nominatim API
+    getCoordinates(start, function (startCoords) {
+        getCoordinates(end, function (endCoords) {
+            if (routeControl) {
+                map.removeControl(routeControl);
+            }
+
+            routeControl = L.Routing.control({
+                waypoints: [
+                    L.latLng(startCoords.lat, startCoords.lon),
+                    L.latLng(endCoords.lat, endCoords.lon)
+                ],
+                routeWhileDragging: true
+            }).addTo(map);
+        });
+    });
 }
 
-document.getElementById("toggleTheme").addEventListener("click", () => {
-    document.body.classList.toggle("dark-mode");
-});
+// Function to get coordinates from address
+function getCoordinates(location, callback) {
+    fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${location}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.length > 0) {
+                callback({ lat: data[0].lat, lon: data[0].lon });
+            } else {
+                alert("Location not found.");
+            }
+        })
+        .catch(error => console.log("Error:", error));
+}
+
+// Fetch weather data
+function getWeather() {
+    let apiKey = "d2b6bd9d10b94f1f6e1a10110407fed7"; // OpenWeather API Key
+    let city = "Berlin"; // Default city (changeable)
+    
+    fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric`)
+        .then(response => response.json())
+        .then(data => {
+            let weatherInfo = `🌡 Temp: ${data.main.temp}°C | 🌦 Condition: ${data.weather[0].description}`;
+            document.getElementById("weather-data").innerText = weatherInfo;
+        })
+        .catch(error => console.log("Error:", error));
+}
+
+// Load weather on startup
+window.onload = getWeather;
