@@ -1,44 +1,67 @@
 document.addEventListener("DOMContentLoaded", () => {
-    // Initialize Map
     let map = L.map('map').setView([52.52, 13.405], 12); // Default to Berlin
 
-    // Load OpenStreetMap
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; OpenStreetMap contributors'
     }).addTo(map);
 
-    // User Location
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(position => {
-            const { latitude, longitude } = position.coords;
-            map.setView([latitude, longitude], 14);
-            L.marker([latitude, longitude]).addTo(map).bindPopup("You are here!");
-        });
-    }
+    let startMarker = null;
+    let endMarker = null;
+    let routeLayer = null;
 
-    document.getElementById("findRoute").addEventListener("click", () => {
-        let start = document.getElementById("start").value;
-        let end = document.getElementById("end").value;
-
-        if (!start || !end) {
-            alert("Please enter both start and destination.");
-            return;
+    // Click to set start & end points
+    map.on("click", function (e) {
+        if (!startMarker) {
+            startMarker = L.marker(e.latlng, { draggable: true }).addTo(map)
+                .bindPopup("Start Point").openPopup();
+        } else if (!endMarker) {
+            endMarker = L.marker(e.latlng, { draggable: true }).addTo(map)
+                .bindPopup("Destination").openPopup();
+            calculateRoute();
         }
-
-        suggestEcoRoute(start, end);
     });
 
-    function suggestEcoRoute(start, end) {
-        let ecoModes = ["Walking", "Cycling", "Public Transport"];
-        let chosenMode = ecoModes[Math.floor(Math.random() * ecoModes.length)];
-        let estimatedTime = Math.floor(Math.random() * (50 - 10) + 10); // Random 10-50 mins
+    function calculateRoute() {
+        if (!startMarker || !endMarker) return;
 
-        document.getElementById("mode").innerText = chosenMode;
-        document.getElementById("time").innerText = `${estimatedTime} mins`;
+        let startCoords = startMarker.getLatLng();
+        let endCoords = endMarker.getLatLng();
+        let url = `https://routing.openstreetmap.de/routed-foot/route/v1/driving/${startCoords.lng},${startCoords.lat};${endCoords.lng},${endCoords.lat}?overview=full&geometries=geojson`;
 
-        // Placeholder for future route visualization
-        alert(`Suggested mode: ${chosenMode}\nEstimated time: ${estimatedTime} mins`);
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                if (routeLayer) {
+                    map.removeLayer(routeLayer);
+                }
+
+                let routeCoords = data.routes[0].geometry.coordinates.map(coord => [coord[1], coord[0]]);
+                routeLayer = L.polyline(routeCoords, { color: "green", weight: 5 }).addTo(map);
+                
+                let distance = (data.routes[0].distance / 1000).toFixed(2); // Convert meters to km
+                let estimatedTime = Math.ceil(data.routes[0].duration / 60); // Convert seconds to minutes
+                let ecoModes = ["Walking", "Cycling", "Public Transport"];
+                let chosenMode = ecoModes[Math.floor(Math.random() * ecoModes.length)];
+
+                document.getElementById("mode").innerText = chosenMode;
+                document.getElementById("distance").innerText = `${distance} km`;
+                document.getElementById("time").innerText = `${estimatedTime} mins`;
+            })
+            .catch(error => console.error("Error fetching route:", error));
     }
+
+    // Reset Map
+    document.getElementById("reset").addEventListener("click", () => {
+        if (startMarker) map.removeLayer(startMarker);
+        if (endMarker) map.removeLayer(endMarker);
+        if (routeLayer) map.removeLayer(routeLayer);
+        startMarker = null;
+        endMarker = null;
+        routeLayer = null;
+        document.getElementById("mode").innerText = "";
+        document.getElementById("distance").innerText = "";
+        document.getElementById("time").innerText = "";
+    });
 
     // Dark Mode Toggle
     document.getElementById("toggleTheme").addEventListener("click", () => {
