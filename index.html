@@ -5,19 +5,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Eco-Friendly Route Planner</title>
     <link rel="stylesheet" href="styles.css">
-    <script defer src="script.js"></script>
+    
+    <!-- Leaflet CSS for Maps -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    
+    <!-- JavaScript files -->
+    <script defer src="script.js"></script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 </head>
 <body>
     <div class="container">
         <h1>Eco-Friendly Route Planner</h1>
+        
         <div class="search-container">
             <input type="text" id="start" placeholder="Enter starting location">
             <input type="text" id="end" placeholder="Enter destination">
             <button id="findRoute">Find Route</button>
         </div>
+
         <div id="map"></div>
+        
         <p id="weatherInfo">Weather Info: Loading...</p>
         <button id="toggleTheme">Toggle Dark Mode</button>
     </div>
